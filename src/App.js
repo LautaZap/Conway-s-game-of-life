@@ -19,6 +19,14 @@ function App() {
 
   const [grid, setGrid] = useState(emptyGrid);
 
+  const handleClick = (i, j) => {
+    // setGrid([...grid], (grid[i][j] = grid[i][j] === 0 ? 1 : 0));
+
+    const copy = [...grid];
+    copy[i][j] = copy[i][j] === 0 ? 1 : 0;
+    setGrid(copy);
+  };
+
   return (
     <div
       className="App"
@@ -33,15 +41,16 @@ function App() {
         return rows.map((cell, j) => {
           return (
             <div
+              key={`${i}-${j}`}
+              onClick={() => {
+                handleClick(i, j);
+              }}
               style={{
                 border: "solid 1px black",
                 borderRadius: "100%",
                 width: 20,
                 height: 20,
-              }}
-              key={`${i}-${j}`}
-              onClick={() => {
-                console.log("click");
+                backgroundColor: cell === 0 ? "" : "green",
               }}
             />
           );
