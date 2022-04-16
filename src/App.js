@@ -15,7 +15,7 @@ const neighborsCells = [
 function App() {
   let numRows = 9;
   let numCols = 9;
-  const timer = 1000;
+  const timer = 300;
 
   const emptyGrid = () => {
     let newGrid = [];
@@ -31,6 +31,7 @@ function App() {
 
   const [grid, setGrid] = useState(emptyGrid);
   const [running, setRunning] = useState(false);
+  const [generation, setGeneration] = useState(0);
 
   const runningRef = useRef(running);
   runningRef.current = running;
@@ -69,11 +70,19 @@ function App() {
       }
       return nextGrid;
     });
+    setGeneration((prevValues) => {
+      return ++prevValues;
+    });
 
     setTimeout(() => {
       simulation();
     }, timer);
   }, []);
+
+  const handleReset = () => {
+    setGrid(emptyGrid);
+    setGeneration(0);
+  };
 
   return (
     <>
@@ -86,8 +95,10 @@ function App() {
           }
         }}
       >
-        {running ? "stop" : "start"}
+        {running ? "Stop" : "Start"}
       </button>
+      <button onClick={() => handleReset()}>Reset</button>
+      <span>generacion - {generation}</span>
       <div
         className="App"
         style={{
