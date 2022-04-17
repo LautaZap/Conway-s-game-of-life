@@ -17,15 +17,17 @@ function App() {
 
   const [gridSize, setGridSize] = useState({ row: 9, col: 9 });
   const [input, setInput] = useState({ row: 0, col: 0 });
+  const sizeRef = useRef(gridSize);
+  sizeRef.current = gridSize;
 
   const emptyGrid = () => {
     let newGrid = [];
-    for (let i = 0; i < gridSize.row; i++) {
-      const newCol = [];
-      for (let j = 0; j < gridSize.col; j++) {
-        newCol.push(0);
+    for (let i = 0; i < sizeRef.current.row; i++) {
+      const newRow = [];
+      for (let j = 0; j < sizeRef.current.col; j++) {
+        newRow.push(0);
       }
-      newGrid.push(newCol);
+      newGrid.push(newRow);
     }
     return newGrid;
   };
