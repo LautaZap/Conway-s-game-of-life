@@ -13,15 +13,16 @@ const neighborsCells = [
 ];
 
 function App() {
-  let numRows = 9;
-  let numCols = 9;
   const timer = 300;
+
+  const [gridSize, setGridSize] = useState({ row: 9, col: 9 });
+  const [input, setInput] = useState({ row: 0, col: 0 });
 
   const emptyGrid = () => {
     let newGrid = [];
-    for (let i = 0; i < numRows; i++) {
+    for (let i = 0; i < gridSize.row; i++) {
       const newCol = [];
-      for (let j = 0; j < numCols; j++) {
+      for (let j = 0; j < gridSize.col; j++) {
         newCol.push(0);
       }
       newGrid.push(newCol);
@@ -42,20 +43,33 @@ function App() {
     setGrid(copy);
   };
 
-  const simulation = useCallback(() => {
+  const simulation = () => {
     if (!runningRef.current) {
       return;
     }
 
+    nextGeneration();
+
+    setTimeout(() => {
+      simulation();
+    }, timer);
+  };
+
+  const handleReset = () => {
+    setGrid(emptyGrid);
+    setGeneration(0);
+  };
+
+  const nextGeneration = useCallback(() => {
     setGrid((prevValues) => {
       let nextGrid = emptyGrid();
       let copyGrid = [...prevValues];
-      for (let i = 0; i < numRows; i++) {
-        for (let j = 0; j < numCols; j++) {
+      for (let i = 0; i < gridSize.row; i++) {
+        for (let j = 0; j < gridSize.col; j++) {
           let neighbors = 0;
           neighborsCells.forEach((cell) => {
-            let x = (cell[0] + i + numRows) % numRows;
-            let y = (cell[1] + j + numCols) % numCols;
+            let x = (cell[0] + i + gridSize.row) % gridSize.row;
+            let y = (cell[1] + j + gridSize.col) % gridSize.col;
             neighbors += copyGrid[x][y];
           });
 
@@ -70,19 +84,27 @@ function App() {
       }
       return nextGrid;
     });
+
     setGeneration((prevValues) => {
       return ++prevValues;
     });
-
-    setTimeout(() => {
-      simulation();
-    }, timer);
   }, []);
 
-  const handleReset = () => {
-    setGrid(emptyGrid);
-    setGeneration(0);
+  const handleGridSize = (e) => {
+    e.preventDefault();
+    setGridSize({ row: input.row, col: input.col });
   };
+
+  const handleInputChange = (e) => {
+    setInput({
+      ...input,
+      [e.target.name]: parseInt(e.target.value),
+    });
+  };
+
+  useEffect(() => {
+    setGrid(emptyGrid);
+  }, [gridSize]);
 
   return (
     <>
@@ -97,13 +119,21 @@ function App() {
       >
         {running ? "Stop" : "Start"}
       </button>
+      <button
+        onClick={() => {
+          nextGeneration();
+        }}
+      >
+        Next Generation
+      </button>
       <button onClick={() => handleReset()}>Reset</button>
       <span>generacion - {generation}</span>
+
       <div
         className="App"
         style={{
           display: "grid",
-          gridTemplateColumns: `repeat(${numCols}, 20px)`,
+          gridTemplateColumns: `repeat(${gridSize.col}, 20px)`,
           gridGap: "10px",
           margin: "10px",
         }}
@@ -128,6 +158,29 @@ function App() {
           });
         })}
       </div>
+      <form className="row" onSubmit={handleGridSize}>
+        <div className="col-md-3">
+          <input
+            type="text"
+            placeholder="Filas"
+            className="form-control"
+            onChange={handleInputChange}
+            name="row"
+          ></input>
+        </div>
+        <div className="col-md-3">
+          <input
+            type="text"
+            placeholder="Columnas"
+            className="form-control"
+            onChange={handleInputChange}
+            name="col"
+          ></input>
+        </div>
+        <button type="submit" className="btn btn-primary">
+          Enviar
+        </button>
+      </form>
     </>
   );
 }
