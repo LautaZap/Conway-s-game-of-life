@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import "./App.css";
+import { patterns } from "./utils/patterns";
 
 const neighborsCells = [
   [0, 1],
@@ -12,11 +13,26 @@ const neighborsCells = [
   [-1, 0],
 ];
 
+// const patterns = [
+//   // [-1, 1],
+//   // [0, 1],
+//   // [1, 1],
+//   // [1, 0],
+//   // [0, -1],
+//   [0, 0],
+//   [-1, 0],
+//   [0, -1],
+//   [-1, 1],
+//   [0, 1],
+//   [-1, 2],
+// ];
+
 function App() {
   const timer = 300;
 
-  const [gridSize, setGridSize] = useState({ row: 9, col: 9 });
+  const [gridSize, setGridSize] = useState({ row: 50, col: 30 });
   const [input, setInput] = useState({ row: 0, col: 0 });
+  const [select, setSelect] = useState("1");
   const sizeRef = useRef(gridSize);
   sizeRef.current = gridSize;
 
@@ -40,8 +56,15 @@ function App() {
   runningRef.current = running;
 
   const handleClick = (i, j) => {
+    console.log(typeof select, patterns);
+    const selectedPattern = patterns.find((element) => element.id === select);
+
     const copy = [...grid];
-    copy[i][j] = copy[i][j] === 0 ? 1 : 0;
+    selectedPattern.pattern.forEach((cell) => {
+      const newX = (i + cell[0] + gridSize.row) % gridSize.row;
+      const newY = (j + cell[1] + gridSize.col) % gridSize.col;
+      copy[newX][newY] = 1;
+    });
     setGrid(copy);
   };
 
@@ -66,12 +89,12 @@ function App() {
     setGrid((prevValues) => {
       let nextGrid = emptyGrid();
       let copyGrid = [...prevValues];
-      for (let i = 0; i < gridSize.row; i++) {
-        for (let j = 0; j < gridSize.col; j++) {
+      for (let i = 0; i < sizeRef.current.row; i++) {
+        for (let j = 0; j < sizeRef.current.col; j++) {
           let neighbors = 0;
           neighborsCells.forEach((cell) => {
-            let x = (cell[0] + i + gridSize.row) % gridSize.row;
-            let y = (cell[1] + j + gridSize.col) % gridSize.col;
+            let x = (cell[0] + i + sizeRef.current.row) % sizeRef.current.row;
+            let y = (cell[1] + j + sizeRef.current.col) % sizeRef.current.col;
             neighbors += copyGrid[x][y];
           });
 
@@ -95,6 +118,7 @@ function App() {
   const handleGridSize = (e) => {
     e.preventDefault();
     setGridSize({ row: input.row, col: input.col });
+    setGrid(emptyGrid);
   };
 
   const handleInputChange = (e) => {
@@ -104,9 +128,9 @@ function App() {
     });
   };
 
-  useEffect(() => {
-    setGrid(emptyGrid);
-  }, [gridSize]);
+  const handleSelect = (e) => {
+    setSelect(e.target.value);
+  };
 
   return (
     <>
@@ -130,6 +154,16 @@ function App() {
       </button>
       <button onClick={() => handleReset()}>Reset</button>
       <span>generacion - {generation}</span>
+
+      <select value={select} onChange={handleSelect}>
+        {patterns.map((element) => {
+          return (
+            <option key={element.id} value={element.id}>
+              {element.name}
+            </option>
+          );
+        })}
+      </select>
 
       <div
         className="App"
@@ -182,6 +216,7 @@ function App() {
         <button type="submit" className="btn btn-primary">
           Enviar
         </button>
+        <hr />
       </form>
     </>
   );
