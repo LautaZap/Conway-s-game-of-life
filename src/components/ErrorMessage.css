@@ -1,0 +1,11 @@
+.error-msg {
+  color: rgb(108, 0, 0);
+}
+
+.div-error {
+  background-color: rgb(255, 88, 88);
+  border: 2px rgb(108, 0, 0) solid;
+  max-width: 60%;
+  padding: 0.3rem;
+  margin: auto;
+}

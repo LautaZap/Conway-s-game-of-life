@@ -1,5 +1,6 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import "./App.css";
+import ErrorMessage from "./components/ErrorMessage";
 import { patterns } from "./utils/patterns";
 
 const neighborsCells = [
@@ -13,25 +14,9 @@ const neighborsCells = [
   [-1, 0],
 ];
 
-// const patterns = [
-//   // [-1, 1],
-//   // [0, 1],
-//   // [1, 1],
-//   // [1, 0],
-//   // [0, -1],
-//   [0, 0],
-//   [-1, 0],
-//   [0, -1],
-//   [-1, 1],
-//   [0, 1],
-//   [-1, 2],
-// ];
-
 function App() {
-  const timer = 300;
-
-  const [gridSize, setGridSize] = useState({ row: 50, col: 30 });
-  const [input, setInput] = useState({ row: 0, col: 0 });
+  const [gridSize, setGridSize] = useState({ row: 10, col: 10 });
+  const [input, setInput] = useState({ row: 0, col: 0, timer: 0 });
   const [select, setSelect] = useState("1");
   const sizeRef = useRef(gridSize);
   sizeRef.current = gridSize;
@@ -51,20 +36,41 @@ function App() {
   const [grid, setGrid] = useState(emptyGrid);
   const [running, setRunning] = useState(false);
   const [generation, setGeneration] = useState(0);
+  const [message, setMessage] = useState("");
+  const [timer, setTimer] = useState(300);
 
   const runningRef = useRef(running);
   runningRef.current = running;
 
   const handleClick = (i, j) => {
-    console.log(typeof select, patterns);
-    const selectedPattern = patterns.find((element) => element.id === select);
+    // Selecciono en patterns a través del id el patron deseado
+    const { minCols, minRows, name, pattern } = patterns.find(
+      (element) => element.id === select
+    );
 
+    // Realizo una copia del tablero
     const copy = [...grid];
-    selectedPattern.pattern.forEach((cell) => {
-      const newX = (i + cell[0] + gridSize.row) % gridSize.row;
-      const newY = (j + cell[1] + gridSize.col) % gridSize.col;
-      copy[newX][newY] = 1;
-    });
+
+    // Compruebo que la matriz actual cumpla con el tamaño minimo del patron seleccionado
+    if (minCols <= gridSize.col && minRows <= gridSize.row) {
+      // Recorro todas las coordenadas de las celdas vecinas y les asigno el estado "vivo" a las correspondientes
+      pattern.forEach((cell) => {
+        const newX = (i + cell[0] + gridSize.row) % gridSize.row;
+        const newY = (j + cell[1] + gridSize.col) % gridSize.col;
+        copy[newX][newY] = 1;
+      });
+    } else {
+      // De no cumplirse la condicion de tamaño mínimo se muestra un mensaje de error en pantalla
+      setMessage(
+        `Error! la matriz deberá tener como mínimo ${minCols} columnas y ${minRows} filas para usar el patron "${name}"`
+      );
+
+      // Pasados 2 segundos el mensaje de error desaparecerá
+      setTimeout(() => {
+        setMessage("");
+      }, 2000);
+    }
+
     setGrid(copy);
   };
 
@@ -77,6 +83,10 @@ function App() {
 
     setTimeout(() => {
       simulation();
+      // window.localStorage.setItem(
+      //   "Conway's game of life",
+      //   JSON.stringify(grid)
+      // );
     }, timer);
   };
 
@@ -132,6 +142,36 @@ function App() {
     setSelect(e.target.value);
   };
 
+  const handleTimer = (e) => {
+    e.preventDefault();
+    setTimer(input.timer);
+  };
+
+  // Creo un estado para controlar si se recibieron los datos de la grilla en el localStorage
+  const [localSorageGrid, setLocalSorageGrid] = useState(false);
+
+  useEffect(() => {
+    // Si el estado de localStorageGrid es falso, accedo a los datos de localstorage
+    if (!localSorageGrid) {
+      const gridLocalStorage = JSON.parse(
+        window.localStorage.getItem("Conway's game of life")
+      );
+      if (!gridLocalStorage) {
+        return;
+      }
+      setGrid(gridLocalStorage);
+      setLocalSorageGrid(true);
+    }
+
+    // Una vez que los datos de localStorage son recuperados cada vez que se llame a este useEffect se actualizará el almacenamiento
+    else {
+      window.localStorage.setItem(
+        "Conway's game of life",
+        JSON.stringify(grid)
+      );
+    }
+  }, [grid]);
+
   return (
     <>
       <button
@@ -145,6 +185,21 @@ function App() {
       >
         {running ? "Stop" : "Start"}
       </button>
+
+      <form onSubmit={handleTimer}>
+        <div>
+          <input
+            type="text"
+            placeholder="Milisegundos"
+            className="form-control"
+            onChange={handleInputChange}
+            value={input.timer}
+            name="timer"
+          ></input>
+          <button type="submit"> Establecer intervalo </button>
+        </div>
+      </form>
+
       <button
         onClick={() => {
           nextGeneration();
@@ -164,6 +219,8 @@ function App() {
           );
         })}
       </select>
+
+      {message && <ErrorMessage message={message} />}
 
       <div
         className="App"
@@ -194,28 +251,28 @@ function App() {
           });
         })}
       </div>
-      <form className="row" onSubmit={handleGridSize}>
-        <div className="col-md-3">
+      <form onSubmit={handleGridSize}>
+        <div>
           <input
             type="text"
             placeholder="Filas"
             className="form-control"
             onChange={handleInputChange}
+            value={input.row}
             name="row"
           ></input>
         </div>
-        <div className="col-md-3">
+        <div>
           <input
             type="text"
             placeholder="Columnas"
             className="form-control"
             onChange={handleInputChange}
+            value={input.col}
             name="col"
           ></input>
         </div>
-        <button type="submit" className="btn btn-primary">
-          Enviar
-        </button>
+        <button type="submit">Enviar</button>
         <hr />
       </form>
     </>

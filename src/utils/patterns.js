@@ -149,7 +149,7 @@ export const patterns = [
   {
     id: "8",
     name: "Lightweight spaceship",
-    minRows: 5,
+    minRows: 6,
     minCols: 7,
     pattern: [
       [2, -1],
