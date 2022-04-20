@@ -4,7 +4,9 @@
 export const patterns = [
   {
     id: "1",
+    type: "none",
     name: "Dot",
+    image: "./images/dot.png",
     minRows: 1,
     minCols: 1,
     pattern: [[0, 0]],
@@ -13,6 +15,8 @@ export const patterns = [
   {
     id: "2",
     name: "Blinker",
+    type: "Oscillators",
+    image: "./images/blinker.png",
     minRows: 3,
     minCols: 3,
     pattern: [
@@ -25,6 +29,8 @@ export const patterns = [
   {
     id: "3",
     name: "Toad",
+    type: "Oscillators",
+    image: "./images/toad.png",
     minRows: 4,
     minCols: 4,
     pattern: [
@@ -40,6 +46,8 @@ export const patterns = [
   {
     id: "4",
     name: "Beacon",
+    type: "Oscillators",
+    image: "./images/beacon.png",
     minRows: 4,
     minCols: 4,
     pattern: [
@@ -57,6 +65,8 @@ export const patterns = [
   {
     id: "5",
     name: "Pulsar",
+    type: "Oscillators",
+    image: "./images/pulsar.png",
     minRows: 15,
     minCols: 15,
     pattern: [
@@ -114,6 +124,8 @@ export const patterns = [
   {
     id: "6",
     name: "Pentadecathlon",
+    type: "Oscillators",
+    image: "./images/pentadecathlon.png",
     minRows: 16,
     minCols: 9,
     pattern: [
@@ -135,6 +147,8 @@ export const patterns = [
   {
     id: "7",
     name: "Glider",
+    type: "Spaceships",
+    image: "./images/glider.png",
     minRows: 5,
     minCols: 5,
     pattern: [
@@ -149,6 +163,8 @@ export const patterns = [
   {
     id: "8",
     name: "Lightweight spaceship",
+    type: "Spaceships",
+    image: "./images/LWSS.png",
     minRows: 6,
     minCols: 7,
     pattern: [
@@ -167,6 +183,8 @@ export const patterns = [
   {
     id: "9",
     name: "Middleweight spaceship",
+    type: "Spaceships",
+    image: "./images/MWSS.png",
     minRows: 7,
     minCols: 9,
     pattern: [
@@ -187,6 +205,8 @@ export const patterns = [
   {
     id: "10",
     name: "Heavyweight spaceship",
+    type: "Spaceships",
+    image: "./images/HWSS.png",
     minRows: 7,
     minCols: 10,
     pattern: [
@@ -209,6 +229,8 @@ export const patterns = [
   {
     id: "11",
     name: "Block",
+    type: "Still lifes",
+    image: "./images/block.png",
     minRows: 2,
     minCols: 2,
     pattern: [
@@ -222,6 +244,8 @@ export const patterns = [
   {
     id: "12",
     name: "Beehive",
+    type: "Still lifes",
+    image: "./images/beehive.png",
     minRows: 3,
     minCols: 4,
     pattern: [
@@ -237,6 +261,8 @@ export const patterns = [
   {
     id: "13",
     name: "Loaf",
+    type: "Still lifes",
+    image: "./images/loaf.png",
     minRows: 4,
     minCols: 4,
     pattern: [
@@ -253,6 +279,8 @@ export const patterns = [
   {
     id: "14",
     name: "Boat",
+    type: "Still lifes",
+    image: "./images/boat.png",
     minRows: 3,
     minCols: 3,
     pattern: [
@@ -267,6 +295,8 @@ export const patterns = [
   {
     id: "15",
     name: "Tub",
+    type: "Still lifes",
+    image: "./images/tub.png",
     minRows: 3,
     minCols: 3,
     pattern: [

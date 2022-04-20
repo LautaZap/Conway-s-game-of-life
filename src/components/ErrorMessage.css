@@ -3,9 +3,11 @@
 }
 
 .div-error {
-  background-color: rgb(255, 88, 88);
+  background-color: #d9534f;
   border: 2px rgb(108, 0, 0) solid;
   max-width: 60%;
   padding: 0.3rem;
-  margin: auto;
+  margin: 20px auto;
+  border-radius: 25px;
+  text-align: center;
 }

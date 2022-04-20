@@ -1,0 +1,13 @@
+.buttons {
+  background-color: #61dafb;
+  margin: 4px;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+}
+
+.buttons:hover {
+  background-color: #03c2f7;
+  cursor: pointer;
+  box-shadow: 2px 2px 1px rgb(41, 41, 41);
+}

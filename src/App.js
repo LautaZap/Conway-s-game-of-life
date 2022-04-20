@@ -1,8 +1,14 @@
 import { useCallback, useRef, useState, useEffect } from "react";
 import "./App.css";
+import DefaultPatterns from "./components/DefaultPatterns";
 import ErrorMessage from "./components/ErrorMessage";
+import Grid from "./components/Grid";
+import GridSizeForm from "./components/GridSizeForm";
+import Info from "./components/Info";
+import TimerForm from "./components/TimerForm";
 import { patterns } from "./utils/patterns";
 
+// Un array con las coordenadas de las celdas vecinas
 const neighborsCells = [
   [0, 1],
   [0, -1],
@@ -15,12 +21,27 @@ const neighborsCells = [
 ];
 
 function App() {
-  const [gridSize, setGridSize] = useState({ row: 10, col: 10 });
-  const [input, setInput] = useState({ row: 0, col: 0, timer: 0 });
+  // Contiene las cantidades de filas y columnas
+  const [gridSize, setGridSize] = useState({ row: 50, col: 30 });
+
+  // Contiene el intervalo de ejecución de cada generación
+  const [timer, setTimer] = useState(300);
+
+  // Controla la entrada de los inputs
+  const [input, setInput] = useState({
+    row: 50,
+    col: 30,
+    timer: 300,
+  });
+
+  // Contiene el Id del patron a imprimir en la grilla, por defecto, 1 = punto
   const [select, setSelect] = useState("1");
+
+  // Variable de referencia para el tamaño de la grilla
   const sizeRef = useRef(gridSize);
   sizeRef.current = gridSize;
 
+  // Función que devuelve una grilla vacía con el tamaño indicado
   const emptyGrid = () => {
     let newGrid = [];
     for (let i = 0; i < sizeRef.current.row; i++) {
@@ -33,12 +54,19 @@ function App() {
     return newGrid;
   };
 
+  // Estados que contiene la grilla, iniciada con una grilla vacía con la funcion anteriormente declarada
   const [grid, setGrid] = useState(emptyGrid);
-  const [running, setRunning] = useState(false);
-  const [generation, setGeneration] = useState(0);
-  const [message, setMessage] = useState("");
-  const [timer, setTimer] = useState(300);
 
+  // Estado para controlar la ejecución de la simulación
+  const [running, setRunning] = useState(false);
+
+  // Estado para controlar la generación actual
+  const [generation, setGeneration] = useState(0);
+
+  // Estado para controlar el mensaje de error al intentar poner un patrón demasiado grande para la grilla
+  const [message, setMessage] = useState("");
+
+  // Variable con referencia al valor de "running"
   const runningRef = useRef(running);
   runningRef.current = running;
 
@@ -57,80 +85,105 @@ function App() {
       pattern.forEach((cell) => {
         const newX = (i + cell[0] + gridSize.row) % gridSize.row;
         const newY = (j + cell[1] + gridSize.col) % gridSize.col;
-        copy[newX][newY] = 1;
+        copy[newX][newY] = copy[newX][newY] === 0 ? 1 : 0;
       });
     } else {
       // De no cumplirse la condicion de tamaño mínimo se muestra un mensaje de error en pantalla
       setMessage(
-        `Error! la matriz deberá tener como mínimo ${minCols} columnas y ${minRows} filas para usar el patron "${name}"`
+        `Error! la grilla deberá tener como mínimo ${minCols} columnas y ${minRows} filas para usar el patron "${name}"`
       );
 
-      // Pasados 2 segundos el mensaje de error desaparecerá
+      // Pasados 4 segundos el mensaje de error desaparecerá
       setTimeout(() => {
         setMessage("");
-      }, 2000);
+      }, 4000);
     }
 
     setGrid(copy);
   };
 
   const simulation = () => {
+    // Compruebo que el usuario haya puesto en ejecución la simulación, de lo contrario salgo
     if (!runningRef.current) {
       return;
     }
 
     nextGeneration();
 
+    // La funcion de va a seguir llamando de forma recursiva hasta que running sea falso
+    // Uso la variable timer para establecer la frecuencia a la que se ejecuta la función simulation
     setTimeout(() => {
       simulation();
-      // window.localStorage.setItem(
-      //   "Conway's game of life",
-      //   JSON.stringify(grid)
-      // );
     }, timer);
   };
 
+  // Función que se encarga de reiniciar la grilla
   const handleReset = () => {
     setGrid(emptyGrid);
     setGeneration(0);
+    setRunning(false);
   };
 
+  //  Función que se encarga de avanzar a la siguiente generación
+  //  Se utiliza el hook useCallback para evitar que la función vuelva a crearse en cada render
   const nextGeneration = useCallback(() => {
     setGrid((prevValues) => {
+      // Se crea una grilla que se usara para la proxima generación
       let nextGrid = emptyGrid();
-      let copyGrid = [...prevValues];
       for (let i = 0; i < sizeRef.current.row; i++) {
         for (let j = 0; j < sizeRef.current.col; j++) {
           let neighbors = 0;
+
+          // Recorro las celdas vecinas usando las coordenadas de neigborsCells
           neighborsCells.forEach((cell) => {
+            // Ecuación que me otorga las coordenadas de las celdas continuas
+            // Cumpliendo la regla de que los extremos se conectan entre sí
             let x = (cell[0] + i + sizeRef.current.row) % sizeRef.current.row;
             let y = (cell[1] + j + sizeRef.current.col) % sizeRef.current.col;
-            neighbors += copyGrid[x][y];
+
+            // Acumulo la cantidad de vecinos vivos que tiene cada celda
+            neighbors += prevValues[x][y];
           });
 
+          // Reglas establecidas por Conway para que la celda elegida viva o muera
           if (neighbors < 2 || neighbors > 3) {
             nextGrid[i][j] = 0;
           } else if (neighbors === 3) {
             nextGrid[i][j] = 1;
           } else {
-            nextGrid[i][j] = copyGrid[i][j];
+            // En caso de que ninguna de las reglas guardo el estado tal cual está en esa posicion
+            nextGrid[i][j] = prevValues[i][j];
           }
         }
       }
       return nextGrid;
     });
 
+    // Paso a la siguiente generación
     setGeneration((prevValues) => {
       return ++prevValues;
     });
   }, []);
 
+  // Función para manejar el cambio de tamaño de la grilla
   const handleGridSize = (e) => {
     e.preventDefault();
     setGridSize({ row: input.row, col: input.col });
     setGrid(emptyGrid);
+    setGeneration(0);
   };
 
+  // Función encargada de reiniciar el tamaño de la grilla al solicidato por defecto
+  const resetSize = (e) => {
+    e.preventDefault();
+    setInput((prevValues) => {
+      return { ...prevValues, row: 50, col: 30 };
+    });
+    setGridSize({ row: 50, col: 30 });
+    setGrid(emptyGrid);
+  };
+
+  // Función encargada de controlar el cambio de los inputs de los formularios
   const handleInputChange = (e) => {
     setInput({
       ...input,
@@ -138,144 +191,134 @@ function App() {
     });
   };
 
-  const handleSelect = (e) => {
-    setSelect(e.target.value);
-  };
-
+  // Función encargada de cambiar el intervalo de tiempo
   const handleTimer = (e) => {
     e.preventDefault();
     setTimer(input.timer);
   };
 
+  // Función encargada de reiniciar el intervalo de tiempo al valor predeterminado
+  const resetTimer = (e) => {
+    e.preventDefault();
+    setTimer(300);
+    setInput((prevValues) => {
+      return { ...prevValues, timer: 300 };
+    });
+  };
+
   // Creo un estado para controlar si se recibieron los datos de la grilla en el localStorage
   const [localSorageGrid, setLocalSorageGrid] = useState(false);
 
+  // Una vez renderizada la página se traeran los datos que haya en el localStorage y localStorageGrid pasara a true
+  // Cada vez que se realice un cambio tanto en la grilla como en el intervalo de tiempo se guardaran dichos cambios
   useEffect(() => {
     // Si el estado de localStorageGrid es falso, accedo a los datos de localstorage
     if (!localSorageGrid) {
       const gridLocalStorage = JSON.parse(
         window.localStorage.getItem("Conway's game of life")
       );
+      setLocalSorageGrid(true);
       if (!gridLocalStorage) {
         return;
       }
-      setGrid(gridLocalStorage);
-      setLocalSorageGrid(true);
+      setGrid(gridLocalStorage.grid);
+      setGridSize(gridLocalStorage.gridSize);
+      setTimer(gridLocalStorage.timer);
+      setGeneration(gridLocalStorage.generation);
     }
 
     // Una vez que los datos de localStorage son recuperados cada vez que se llame a este useEffect se actualizará el almacenamiento
     else {
+      const dataLocalStorage = {
+        grid: grid,
+        timer: timer,
+        gridSize: gridSize,
+        generation: generation,
+      };
       window.localStorage.setItem(
         "Conway's game of life",
-        JSON.stringify(grid)
+        JSON.stringify(dataLocalStorage)
       );
     }
-  }, [grid]);
+  }, [grid, timer, generation, gridSize, localSorageGrid]);
+
+  // Función para cambiar el estado de select por el id del patron deseado
+  const selectPattern = (id) => {
+    setSelect(id);
+  };
 
   return (
-    <>
-      <button
-        onClick={() => {
-          setRunning(!running);
-          if (!running) {
-            runningRef.current = true;
-            simulation();
-          }
-        }}
-      >
-        {running ? "Stop" : "Start"}
-      </button>
+    <div className="container">
+      <h1>Conway's Game of Life</h1>
 
-      <form onSubmit={handleTimer}>
-        <div>
-          <input
-            type="text"
-            placeholder="Milisegundos"
-            className="form-control"
-            onChange={handleInputChange}
-            value={input.timer}
-            name="timer"
-          ></input>
-          <button type="submit"> Establecer intervalo </button>
-        </div>
-      </form>
-
-      <button
-        onClick={() => {
-          nextGeneration();
-        }}
-      >
-        Next Generation
-      </button>
-      <button onClick={() => handleReset()}>Reset</button>
-      <span>generacion - {generation}</span>
-
-      <select value={select} onChange={handleSelect}>
-        {patterns.map((element) => {
-          return (
-            <option key={element.id} value={element.id}>
-              {element.name}
-            </option>
-          );
-        })}
-      </select>
+      <Info
+        rows={gridSize.row}
+        cols={gridSize.col}
+        generation={generation}
+        timer={timer}
+      />
 
       {message && <ErrorMessage message={message} />}
 
-      <div
-        className="App"
-        style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(${gridSize.col}, 20px)`,
-          gridGap: "10px",
-          margin: "10px",
-        }}
-      >
-        {grid.map((rows, i) => {
-          return rows.map((cell, j) => {
-            return (
-              <div
-                key={`${i}-${j}`}
-                onClick={() => {
-                  handleClick(i, j);
-                }}
-                style={{
-                  border: "solid 1px black",
-                  borderRadius: "100%",
-                  width: 20,
-                  height: 20,
-                  backgroundColor: cell === 0 ? "" : "green",
-                }}
-              />
-            );
-          });
-        })}
+      <div className="div-buttons">
+        <div className="div-control-buttons">
+          <button
+            onClick={() => {
+              setRunning(!running);
+              if (!running) {
+                runningRef.current = true;
+                simulation();
+              }
+            }}
+            className="buttons"
+          >
+            {running ? "Detener" : "Iniciar"}
+          </button>
+
+          <button
+            className="buttons"
+            onClick={() => {
+              nextGeneration();
+            }}
+          >
+            Siguiente generación
+          </button>
+
+          <button onClick={() => handleReset()} className="buttons">
+            Reiniciar
+          </button>
+        </div>
+
+        <div className="div-patterns">
+          <DefaultPatterns
+            className="button-patterns"
+            selectPattern={selectPattern}
+          />
+          <span>
+            Seleccionado:{" "}
+            {patterns.find((element) => element.id === select).name}
+          </span>
+        </div>
       </div>
-      <form onSubmit={handleGridSize}>
-        <div>
-          <input
-            type="text"
-            placeholder="Filas"
-            className="form-control"
-            onChange={handleInputChange}
-            value={input.row}
-            name="row"
-          ></input>
-        </div>
-        <div>
-          <input
-            type="text"
-            placeholder="Columnas"
-            className="form-control"
-            onChange={handleInputChange}
-            value={input.col}
-            name="col"
-          ></input>
-        </div>
-        <button type="submit">Enviar</button>
-        <hr />
-      </form>
-    </>
+
+      <Grid grid={grid} handleClick={handleClick} cols={gridSize.col} />
+
+      <div className="div-timer-size">
+        <TimerForm
+          handleTimer={handleTimer}
+          timer={input.timer}
+          handleInputChange={handleInputChange}
+          resetTimer={resetTimer}
+        />
+        <GridSizeForm
+          handleGridSize={handleGridSize}
+          handleInputChange={handleInputChange}
+          row={input.row}
+          col={input.col}
+          resetSize={resetSize}
+        />
+      </div>
+    </div>
   );
 }
 

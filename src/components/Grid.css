@@ -1,0 +1,15 @@
+.div-grid {
+  display: grid;
+  grid-gap: 10px;
+  margin: 2rem auto;
+  justify-content: center;
+}
+
+.container-grid {
+  padding: 10px;
+  max-height: 40rem;
+  overflow: auto;
+  display: flex;
+  background-color: white;
+  border-radius: 10px;
+}
