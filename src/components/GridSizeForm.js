@@ -28,6 +28,8 @@ const GridSizeForm = ({
             className="custom-input"
             value={row}
             name="row"
+            min="0"
+            required
           ></input>
         </div>
         <div className="div-size-grid">
@@ -41,6 +43,8 @@ const GridSizeForm = ({
             onChange={handleInputChange}
             value={col}
             name="col"
+            min="0"
+            required
           ></input>
         </div>
         <button type="submit" className="button-form">

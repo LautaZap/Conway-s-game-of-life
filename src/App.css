@@ -76,6 +76,12 @@
   margin-top: 4rem;
   border: 2px black solid;
   border-radius: 5px;
+  background-color: rgb(240, 248, 255);
+}
+
+.name {
+  margin-top: 10px;
+  color: #0275d8;
 }
 
 @media only screen and (max-width: 600px) {
@@ -90,5 +96,10 @@
   .div-control-buttons {
     display: flex;
     flex-direction: column;
+  }
+
+  .container {
+    margin: 1vh 7vh;
+    text-align: center;
   }
 }

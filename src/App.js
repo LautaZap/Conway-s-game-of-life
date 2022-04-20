@@ -7,18 +7,14 @@ import GridSizeForm from "./components/GridSizeForm";
 import Info from "./components/Info";
 import TimerForm from "./components/TimerForm";
 import { patterns } from "./utils/patterns";
-
-// Un array con las coordenadas de las celdas vecinas
-const neighborsCells = [
-  [0, 1],
-  [0, -1],
-  [1, -1],
-  [-1, -1],
-  [1, 1],
-  [-1, 1],
-  [1, 0],
-  [-1, 0],
-];
+import { neighborsCells } from "./utils/neighborCells";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faForwardStep,
+  faPause,
+  faPlay,
+  faArrowRotateLeft,
+} from "@fortawesome/free-solid-svg-icons";
 
 function App() {
   // Contiene las cantidades de filas y columnas
@@ -33,6 +29,14 @@ function App() {
     col: 30,
     timer: 300,
   });
+
+  // Función encargada de controlar el cambio de los inputs de los formularios
+  const handleInputChange = (e) => {
+    setInput({
+      ...input,
+      [e.target.name]: parseInt(e.target.value),
+    });
+  };
 
   // Contiene el Id del patron a imprimir en la grilla, por defecto, 1 = punto
   const [select, setSelect] = useState("1");
@@ -181,14 +185,7 @@ function App() {
     });
     setGridSize({ row: 50, col: 30 });
     setGrid(emptyGrid);
-  };
-
-  // Función encargada de controlar el cambio de los inputs de los formularios
-  const handleInputChange = (e) => {
-    setInput({
-      ...input,
-      [e.target.name]: parseInt(e.target.value),
-    });
+    setGeneration(0);
   };
 
   // Función encargada de cambiar el intervalo de tiempo
@@ -217,6 +214,8 @@ function App() {
       const gridLocalStorage = JSON.parse(
         window.localStorage.getItem("Conway's game of life")
       );
+
+      // Cambio el valor de localStorageGrid para indicar que para este punto ya se trajeron los datos del localStorage
       setLocalSorageGrid(true);
       if (!gridLocalStorage) {
         return;
@@ -272,7 +271,15 @@ function App() {
             }}
             className="buttons"
           >
-            {running ? "Detener" : "Iniciar"}
+            {running ? (
+              <>
+                Detener <FontAwesomeIcon icon={faPause} />
+              </>
+            ) : (
+              <>
+                Iniciar <FontAwesomeIcon icon={faPlay} />
+              </>
+            )}
           </button>
 
           <button
@@ -281,11 +288,11 @@ function App() {
               nextGeneration();
             }}
           >
-            Siguiente generación
+            Siguiente generación <FontAwesomeIcon icon={faForwardStep} />
           </button>
 
           <button onClick={() => handleReset()} className="buttons">
-            Reiniciar
+            Reiniciar <FontAwesomeIcon icon={faArrowRotateLeft} />
           </button>
         </div>
 
@@ -317,6 +324,10 @@ function App() {
           col={input.col}
           resetSize={resetSize}
         />
+      </div>
+
+      <div className="name">
+        <span>Por Lautaro Zapata 2022</span>
       </div>
     </div>
   );

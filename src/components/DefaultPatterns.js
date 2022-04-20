@@ -3,6 +3,8 @@ import useModals from "../hooks/useModals";
 import PatternsModal from "./PatternsModal";
 import { patterns } from "../utils/patterns";
 import "../App.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBraille } from "@fortawesome/free-solid-svg-icons";
 
 // Componente que va a hacer uso del modal de patrones
 const DefaultPatterns = ({ selectPattern }) => {
@@ -13,7 +15,7 @@ const DefaultPatterns = ({ selectPattern }) => {
     <div>
       {/* Botón que se muestra en pantalla y que abre el modal */}
       <button className="buttons" onClick={openModal}>
-        Cambiar patrón
+        Cambiar patrón <FontAwesomeIcon icon={faBraille} />
       </button>
 
       {/* Modal que contiene un map con todos los patrones cargados */}

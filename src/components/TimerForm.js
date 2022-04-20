@@ -1,7 +1,7 @@
 import React from "react";
 import "./Forms.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRotateLeft } from "@fortawesome/free-solid-svg-icons";
+import { faClockRotateLeft } from "@fortawesome/free-solid-svg-icons";
 
 // Componente que renderiza el formulario para cambiar el tiempo de ejecución
 const TimerForm = ({ handleTimer, handleInputChange, timer, resetTimer }) => {
@@ -27,7 +27,7 @@ const TimerForm = ({ handleTimer, handleInputChange, timer, resetTimer }) => {
             Aceptar
           </button>
           <button type="submit" className="button-reset" onClick={resetTimer}>
-            <FontAwesomeIcon icon={faArrowRotateLeft} />
+            <FontAwesomeIcon icon={faClockRotateLeft} />
           </button>
         </div>
       </form>
